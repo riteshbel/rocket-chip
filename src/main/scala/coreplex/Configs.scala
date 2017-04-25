@@ -153,7 +153,13 @@ class WithNBreakpoints(hwbp: Int) extends Config ((site, here, up) => {
   }
 })
 
-class WithRoccExample extends Config((site, here, up) => {
+class WithRoCC extends Config((site, here, up) => {
+  case RocketTilesKey => up(RocketTilesKey, site).map { r =>
+    r.copy(rocc = site(BuildRoCC))
+  }
+})
+
+class WithRoCCExample extends Config((site, here, up) => {
   case BuildRoCC => Seq(
     RoCCParams(
       opcodes = OpcodeSet.custom0,

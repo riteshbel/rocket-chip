@@ -71,7 +71,8 @@ class DualChannelDualBankL2Config extends Config(
   new WithNMemoryChannels(2) ++ new WithNBanksPerMemChannel(2) ++
   new WithL2Cache ++ new BaseConfig)
 
-class RoccExampleConfig extends Config(new WithRoccExample ++ new DefaultConfig)
+class RoCCExampleConfig extends Config(
+  new WithRoCCExample ++ new WithRoCC ++ new DefaultConfig)
 
 class Edge128BitConfig extends Config(
   new WithEdgeDataBits(128) ++ new BaseConfig)

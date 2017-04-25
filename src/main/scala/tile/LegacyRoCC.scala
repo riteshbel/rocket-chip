@@ -48,7 +48,7 @@ trait CanHaveLegacyRoccs extends CanHaveSharedFPU with CanHavePTW with HasTileLi
     }})))
 
   legacyRocc foreach { lr =>
-    masterNode := lr.masterNode
+    masterNode :=* lr.masterNode
     nPTWPorts += lr.nPTWPorts
     nDCachePorts += lr.nRocc
   }
@@ -66,7 +66,7 @@ trait CanHaveLegacyRoccsModule extends CanHaveSharedFPUModule
       None
     } foreach { lr =>
       fpu.io.cp_req <> lr.module.io.fpu.cp_req
-      fpu.io.cp_resp <> lr.module.io.fpu.cp_resp
+      lr.module.io.fpu.cp_resp <> fpu.io.cp_resp
     }
   }
 
@@ -129,7 +129,7 @@ class LegacyRoccComplex(implicit p: Parameters) extends LazyModule {
       rocc
     }
 
-    (nRocc until legacies.size) zip roccs.map(_.io.utl) foreach { case(i, utl) =>
+    (nRocc until legacies.size) zip roccs.flatMap(_.io.utl) foreach { case(i, utl) =>
       legacies(i).module.io.legacy <> utl
     }
     io.core.busy := cmdRouter.io.busy || roccs.map(_.io.busy).reduce(_ || _)

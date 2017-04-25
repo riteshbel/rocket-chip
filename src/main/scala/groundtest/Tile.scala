@@ -39,10 +39,10 @@ trait HasGroundTestConstants {
 
 trait HasGroundTestParameters {
   implicit val p: Parameters
-  val tileParams = p(GroundTestKey)(p(TileId))
-  val nUncached = tileParams.uncached
-  val nCached = tileParams.cached
-  val nPTW = tileParams.ptw
+  val groundtestParams = p(GroundTestKey)(p(TileId))
+  val nUncached = groundtestParams.uncached
+  val nCached = groundtestParams.cached
+  val nPTW = groundtestParams.ptw
   val memStart = p(ExtMem).base
   val memStartBlock = memStart >> p(CacheBlockOffsetBits)
 }
@@ -69,12 +69,12 @@ abstract class GroundTest(implicit val p: Parameters) extends Module
 class GroundTestTile(implicit p: Parameters) extends LazyModule
     with HasGroundTestParameters {
   val slave = None
-  val dcacheOpt = tileParams.dcache.map { dc => HellaCache(dc.nMSHRs == 0) }
+  val dcacheOpt = groundtestParams.dcache.map { dc => HellaCache(dc.nMSHRs == 0) }
   val ucLegacy = LazyModule(new TLLegacy)
 
-   val masterNode = TLOutputNode()
-   dcacheOpt.foreach { masterNode := _.node }
-   masterNode := TLHintHandler()(ucLegacy.node)
+  val masterNode = TLOutputNode()
+  dcacheOpt.foreach { masterNode := _.node }
+  masterNode := TLHintHandler()(ucLegacy.node)
 
   lazy val module = new LazyModuleImp(this) {
     val io = new Bundle {
