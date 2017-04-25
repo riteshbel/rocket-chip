@@ -163,15 +163,17 @@ class WithRoCCExample extends Config((site, here, up) => {
   case BuildRoCC => Seq(
     RoCCParams(
       opcodes = OpcodeSet.custom0,
-      generator = (p: Parameters) => Module(new AccumulatorExample()(p))),
+      generator = (edge: TLEdgeOut, p: Parameters) =>
+        Module(new AccumulatorExample()(p))),
     RoCCParams(
       opcodes = OpcodeSet.custom1,
-      generator = (p: Parameters) => Module(new TranslatorExample()(p)),
+      generator = (edge: TLEdgeOut, p: Parameters) =>
+        Module(new TranslatorExample()(p)),
       nPTWPorts = 1),
     RoCCParams(
       opcodes = OpcodeSet.custom2,
-      generator = (p: Parameters) => Module(new CharacterCountExample()(p))))
-
+      generator = (edge: TLEdgeOut, p: Parameters) =>
+        Module(new CharacterCountExample()(p))))
   case RoccMaxTaggedMemXacts => 1
 })
 

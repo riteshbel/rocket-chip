@@ -16,7 +16,7 @@ import util.ParameterizedBundle
 
 import scala.collection.mutable.ListBuffer
 
-case object BuildGroundTest extends Field[Parameters => GroundTest]
+case object BuildGroundTest extends Field[(TLEdgeOut, Parameters) => GroundTest]
 
 case class GroundTestTileParams(
     uncached: Int = 0,
@@ -82,7 +82,7 @@ class GroundTestTile(implicit p: Parameters) extends LazyModule
       val success = Bool(OUTPUT)
     }
 
-    val test = p(BuildGroundTest)(p)
+    val test = p(BuildGroundTest)(masterNode.edgesOut(0), p)
 
     val ptwPorts = ListBuffer.empty ++= test.io.ptw
     val uncachedArbPorts = ListBuffer.empty ++= test.io.mem

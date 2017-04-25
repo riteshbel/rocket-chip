@@ -115,10 +115,12 @@ class LegacyRoccComplex(implicit p: Parameters) extends LazyModule {
     cmdRouter.io.in <> io.core.cmd
 
     val roccs = buildRocc.zipWithIndex.map { case (accelParams, i) =>
-      val rocc = accelParams.generator(p.alterPartial({
-        case RoccNMemChannels => accelParams.nMemChannels
-        case RoccNPTWPorts => accelParams.nPTWPorts
-      }))
+      val rocc = accelParams.generator(
+        masterNode.edgesOut(0),
+        p.alterPartial({
+          case RoccNMemChannels => accelParams.nMemChannels
+          case RoccNPTWPorts => accelParams.nPTWPorts
+        }))
       val dcIF = Module(new SimpleHellaCacheIF)
       rocc.io.cmd <> cmdRouter.io.out(i)
       rocc.io.exception := io.core.exception
@@ -155,7 +157,7 @@ class LegacyRoccComplex(implicit p: Parameters) extends LazyModule {
 
 case class RoCCParams(
   opcodes: OpcodeSet,
-  generator: Parameters => RoCC,
+  generator: (TLEdgeOut, Parameters) => RoCC,
   nMemChannels: Int = 0,
   nPTWPorts : Int = 0,
   useFPU: Boolean = false)
@@ -206,13 +208,15 @@ class RoCCIO(implicit p: Parameters) extends RoCCCoreIO()(p) {
   override def cloneType = new RoCCIO()(p).asInstanceOf[this.type]
 }
 
-abstract class RoCC(implicit p: Parameters) extends CoreModule()(p) {
+abstract class RoCC(implicit p: Parameters)
+    extends CoreModule()(p) {
   val io = new RoCCIO
   io.mem.req.bits.phys := Bool(true) // don't perform address translation
   io.mem.invalidate_lr := Bool(false) // don't mess with LR/SC
 }
 
-class AccumulatorExample(n: Int = 4)(implicit p: Parameters) extends RoCC()(p) {
+class AccumulatorExample(n: Int = 4)(implicit p: Parameters)
+    extends RoCC()(p) {
   val regfile = Mem(n, UInt(width = xLen))
   val busy = Reg(init = Vec.fill(n){Bool(false)})
 
@@ -277,7 +281,8 @@ class AccumulatorExample(n: Int = 4)(implicit p: Parameters) extends RoCC()(p) {
   io.autl.grant.ready := false
 }
 
-class TranslatorExample(implicit p: Parameters) extends RoCC()(p) {
+class TranslatorExample(implicit p: Parameters)
+    extends RoCC()(p) {
   val req_addr = Reg(UInt(width = coreMaxAddrBits))
   val req_rd = Reg(io.resp.bits.rd)
   val req_offset = req_addr(pgIdxBits - 1, 0)
@@ -322,7 +327,8 @@ class TranslatorExample(implicit p: Parameters) extends RoCC()(p) {
   io.autl.grant.ready := Bool(false)
 }
 
-class CharacterCountExample(implicit p: Parameters) extends RoCC()(p)
+class CharacterCountExample(implicit p: Parameters)
+    extends RoCC()(p)
     with HasTileLinkParameters {
 
   private val blockOffset = tlBeatAddrBits + tlByteAddrBits

@@ -7,6 +7,7 @@ import Chisel._
 import rocket._
 import diplomacy._
 import uncore.tilelink._
+import uncore.tilelink2.TLEdgeOut
 import uncore.coherence._
 import uncore.agents._
 import uncore.util._
@@ -85,7 +86,7 @@ class WithComparator(n: Int) extends Config((site, here, up) => {
     GroundTestTileParams(uncached = 2, dcache = None)
   }
   case BuildGroundTest =>
-    (p: Parameters) => Module(new ComparatorCore()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new ComparatorCore()(p))
   case ComparatorKey => ComparatorParameters(
     targets    = Seq(site(ExtMem).base, testRamAddr),
     width      = 8,
@@ -110,7 +111,7 @@ class WithMemtest(n: Int) extends Config((site, here, up) => {
     maxRequests = 128,
     startAddress = BigInt(site(ExtMem).base))
   case BuildGroundTest =>
-    (p: Parameters) => Module(new GeneratorTest()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new GeneratorTest()(p))
 })
 
 class WithCacheFillTest(n: Int) extends Config((site, here, up) => {
@@ -118,7 +119,7 @@ class WithCacheFillTest(n: Int) extends Config((site, here, up) => {
     GroundTestTileParams(uncached = 1, dcache = None)
   }
   case BuildGroundTest =>
-    (p: Parameters) => Module(new CacheFillTest()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new CacheFillTest()(p))
 })
 
 class WithBroadcastRegressionTest(n: Int) extends Config((site, here, up) => {
@@ -126,7 +127,7 @@ class WithBroadcastRegressionTest(n: Int) extends Config((site, here, up) => {
     GroundTestTileParams(uncached = 1, maxXacts = 3)
   }
   case BuildGroundTest =>
-    (p: Parameters) => Module(new RegressionTest()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new RegressionTest()(p))
   case GroundTestRegressions =>
     (p: Parameters) => RegressionTests.broadcastRegressions(p)
 })
@@ -136,7 +137,7 @@ class WithCacheRegressionTest(n: Int) extends Config((site, here, up) => {
     GroundTestTileParams(uncached = 1, maxXacts = 5)
   }
   case BuildGroundTest =>
-    (p: Parameters) => Module(new RegressionTest()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new RegressionTest()(p))
   case GroundTestRegressions =>
     (p: Parameters) => RegressionTests.cacheRegressions(p)
 })
@@ -146,7 +147,7 @@ class WithTraceGen(n: Int) extends Config((site, here, up) => {
     GroundTestTileParams(dcache = Some(DCacheParams(nSets = 16, nWays = 1)))
   }
   case BuildGroundTest =>
-    (p: Parameters) => Module(new GroundTestTraceGenerator()(p))
+    (edge: TLEdgeOut, p: Parameters) => Module(new GroundTestTraceGenerator()(p))
   case GeneratorKey => TrafficGeneratorParameters(
     maxRequests = 8192,
     startAddress = 0)
